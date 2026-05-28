@@ -1,17 +1,20 @@
 pipeline {
     agent any
+    tools {
+        maven 'M3'
+    }
     stages {
-        stage('Clean') {
+        stage('清理') {
             steps {
                 bat 'mvn clean'
             }
         }
-        stage('Compile') {
+        stage('编译') {
             steps {
                 bat 'mvn compile'
             }
         }
-        stage('Package') {
+        stage('打包') {
             steps {
                 bat 'mvn package -DskipTests'
             }
@@ -19,7 +22,7 @@ pipeline {
     }
     post {
         always {
-            archiveArtifacts artifacts: 'target/*.war', fingerprint: true
+            archiveArtifacts artifacts: 'docs-web/target/*.war'
         }
     }
 }
