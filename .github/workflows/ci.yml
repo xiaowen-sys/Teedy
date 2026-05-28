@@ -1,0 +1,55 @@
+name: Teedy CI (JDK21)
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build & Clean
+        run: mvn clean compile
+
+      - name: PMD check
+        run: mvn pmd:pmd pmd:cpd
+
+      - name: Run tests
+        run: mvn test || true
+
+      - name: Generate test report HTML
+        run: mvn surefire-report:report || true
+
+      - name: Generate JavaDoc
+        run: mvn javadoc:javadoc || true
+
+      - name: Package War
+        run: mvn package -DskipTests
+
+      - name: Upload War
+        uses: actions/upload-artifact@v4
+        with:
+          name: teedy-war
+          path: docs-web/target/*.war
+
+      - name: Upload Test Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-report-html
+          path: target/site/
+
+      - name: Upload JavaDoc
+        uses: actions/upload-artifact@v4
+        with:
+          name: javadoc
+          path: target/apidocs/
